@@ -42,11 +42,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 var app = builder.Build();
 
 // Enable Swagger middleware
-if (app.Environment.IsDevelopment())
-{
     app.UseSwagger();
     app.UseSwaggerUI(); // Optional: You can customize the UI here
-}
 
 
 app.MapPost("/getblueprint", (User user, IUserService _userService) =>
