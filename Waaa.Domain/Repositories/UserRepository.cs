@@ -9,7 +9,12 @@ namespace Waaa.Domain.Repositories
         {
             dbContext.Users.Add(user);
             var res = dbContext.SaveChanges();
-            return res;
+            return user.Id;
+        }
+
+        public IEnumerable<User> GetUsers()
+        {
+            return dbContext.Users;
         }
     }
 }

@@ -10,5 +10,11 @@ namespace Waaa.Application.Services
         {
             return _userRepository.AddUser(new Domain.Entities.User { Name = user.Name, Email = user.Email, Phone = user.Phone });
         }
+
+        public IEnumerable<User> GetUsers()
+        {
+            var users = _userRepository.GetUsers();
+            return users.Select(u => new User { Id = u.Id, Name = u.Name, Email = u.Email, Phone = u.Phone });
+        }
     }
 }

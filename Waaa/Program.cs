@@ -89,6 +89,13 @@ app.UseSwagger();
 app.UseSwaggerUI(); // Optional: You can customize the UI here
 
 
+app.MapGet("/users", (IUserService _userService) =>
+{
+    return Results.Ok(_userService.GetUsers());
+})
+.WithName("User")
+.WithOpenApi();
+
 app.MapPost("/getblueprint", (User user, IUserService _userService) =>
 {
 
