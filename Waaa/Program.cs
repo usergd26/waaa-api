@@ -41,6 +41,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
 app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
 {
     appBuilder.Use(async (context, next) =>
@@ -80,7 +86,7 @@ app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appB
 
 // Enable Swagger middleware
 app.UseSwagger();
-    app.UseSwaggerUI(); // Optional: You can customize the UI here
+app.UseSwaggerUI(); // Optional: You can customize the UI here
 
 
 app.MapPost("/getblueprint", (User user, IUserService _userService) =>
