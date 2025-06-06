@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Debugging;
+using Serilog.Events;
 using Waaa.Application.Interfaces;
 using Waaa.Application.Services;
 using Waaa.Domain;
@@ -11,10 +14,22 @@ using Waaa.Infrastructure.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()                   // Default minimum level
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)            // Override Microsoft logs to Warning+
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning) // Override ASP.NET Core logs to Warning+
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.MySQL(connectionString, "Logs")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 31))
+    options.UseMySql(connectionString,new MySqlServerVersion(new Version(8, 0, 31))
     ));
 
 builder.Services.AddEndpointsApiExplorer();
