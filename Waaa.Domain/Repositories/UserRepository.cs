@@ -5,10 +5,10 @@ namespace Waaa.Domain.Repositories
 {
     public class UserRepository(AppDbContext dbContext) : IUserRepository
     {
-        public int AddUser(User user)
+        public async Task<int> AddUserAsync(User user)
         {
-            dbContext.Users.Add(user);
-            var res = dbContext.SaveChanges();
+            await dbContext.Users.AddAsync(user);
+            var res = await dbContext.SaveChangesAsync();
             return user.Id;
         }
 

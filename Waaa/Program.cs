@@ -110,10 +110,10 @@ app.MapGet("/users", (IUserService _userService) =>
 .WithName("User")
 .WithOpenApi();
 
-app.MapPost("/getblueprint", (User user, IUserService _userService) =>
+app.MapPost("/getblueprint", async (User user, IUserService _userService) =>
 {
 
-    return Results.Ok(_userService.AddUser(user));
+    return Results.Ok( await _userService.AddUserAsync(user));
 })
 .WithName("Blueprint")
 .WithOpenApi();

@@ -7,9 +7,9 @@ namespace Waaa.Application.Services
 {
     public class UserService(IUserRepository _userRepository, ILogger<UserService> _logger) : IUserService
     {
-        public int AddUser(User user)
+        public async Task<int> AddUserAsync(User user)
         {
-            var userId = _userRepository.AddUser(new Domain.Entities.User { Name = user.Name, Email = user.Email, Phone = user.Phone });
+            var userId = await _userRepository.AddUserAsync(new Domain.Entities.User { Name = user.Name, Email = user.Email, Phone = user.Phone });
             if (userId > 0)
                 _logger.LogInformation("User added successfully: {UserId}", userId);
 

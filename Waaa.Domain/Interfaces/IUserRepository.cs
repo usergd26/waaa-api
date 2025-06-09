@@ -4,7 +4,7 @@ namespace Waaa.Domain.Interfaces
 {
     public interface IUserRepository
     {
-        int AddUser(User user);
+        Task<int> AddUserAsync(User user);
         IEnumerable<User> GetUsers();
     }
 }
