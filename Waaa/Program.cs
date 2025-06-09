@@ -29,8 +29,11 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString,new MySqlServerVersion(new Version(8, 0, 31))
-    ));
+    options.UseMySql(connectionString,new MySqlServerVersion(new Version(8, 0, 31)),
+    mySqlOptions =>
+    {
+        mySqlOptions.EnableRetryOnFailure();
+    }));
 
 builder.Services.AddEndpointsApiExplorer();
 
