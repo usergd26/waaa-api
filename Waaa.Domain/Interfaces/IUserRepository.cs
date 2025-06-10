@@ -6,5 +6,6 @@ namespace Waaa.Domain.Interfaces
     {
         Task<int> AddUserAsync(User user);
         IEnumerable<User> GetUsers();
+        Task<User> GetUserByEmailOrPhoneAsync(string email, string phone);
     }
 }

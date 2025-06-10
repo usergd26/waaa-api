@@ -88,6 +88,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IWebinarRegistrationService, WebinarRegistrationService>();
+builder.Services.AddScoped<IWebinarRegistrationRepository, WebinarRegistrationRepository>();
 
 var app = builder.Build();
 
@@ -118,7 +120,15 @@ app.MapPost("/getblueprint", async (User user, IUserService _userService) =>
 
     return Results.Ok( await _userService.AddUserAsync(user));
 })
-.WithName("Blueprint")
+.WithTags("User")
+.WithOpenApi();
+
+app.MapPost("/registerwebinar", async (User user, IWebinarRegistrationService webinarRegistrationService) =>
+{
+    var result = await webinarRegistrationService.RegisterWebinarAsync(user);
+    return result == 0 ? Results.Conflict("The user is already registered.") : Results.Ok(result);
+})
+.WithTags("Webinar")
 .WithOpenApi();
 
 app.MapGet("/payment/{amount}", (decimal amount) =>

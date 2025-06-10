@@ -7,6 +7,7 @@ namespace Waaa.Domain
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<User> Users { get; set; }
+        public DbSet<WebinarRegistration> WebinarRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +30,23 @@ namespace Waaa.Domain
                       .IsRequired()
                       .HasMaxLength(100);
 
+            });
+
+            modelBuilder.Entity<WebinarRegistration>(entity =>
+            {
+                entity.HasKey(wr => wr.Id);
+                entity.Property(wr => wr.Id)
+                      .ValueGeneratedOnAdd();
+                entity.Property(wr => wr.UserId)
+                      .IsRequired();
+                entity.Property(wr => wr.WebinarId)
+                      .IsRequired();
+                entity.Property(wr => wr.RegistrationDate)
+                      .IsRequired();
+                entity.HasOne(wr => wr.User)
+                      .WithMany()
+                      .HasForeignKey(wr => wr.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
 
