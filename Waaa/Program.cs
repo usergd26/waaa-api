@@ -3,14 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Debugging;
 using Serilog.Events;
-using Waaa.Application.Interfaces;
-using Waaa.Application.Services;
+using Waaa.API.Endpoints;
 using Waaa.Domain;
-using Waaa.Domain.Interfaces;
-using Waaa.Domain.Repositories;
-using Waaa.Infrastructure.Models;
+using Waaa.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,9 +14,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()                   // Default minimum level
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)            // Override Microsoft logs to Warning+
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning) // Override ASP.NET Core logs to Warning+
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)            
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning) 
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.MySQL(connectionString, "Logs")
@@ -86,11 +82,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IWebinarRegistrationService, WebinarRegistrationService>();
-builder.Services.AddScoped<IWebinarRegistrationRepository, WebinarRegistrationRepository>();
-
+builder.Services.AddInfrastructure();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -108,39 +100,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-app.MapGet("/users", (IUserService _userService) =>
-{
-    return Results.Ok(_userService.GetUsers());
-})
-.WithName("User")
-.WithOpenApi();
-
-app.MapPost("/getblueprint", async (User user, IUserService _userService) =>
-{
-
-    return Results.Ok( await _userService.AddUserAsync(user));
-})
-.WithTags("User")
-.WithOpenApi();
-
-app.MapPost("/registerwebinar", async (User user, IWebinarRegistrationService webinarRegistrationService) =>
-{
-    var result = await webinarRegistrationService.RegisterWebinarAsync(user);
-    return result == 0 ? Results.Conflict("The user is already registered.") : Results.Ok(result);
-})
-.WithTags("Webinar")
-.WithOpenApi();
-
-app.MapGet("/payment/{amount}", (decimal amount) =>
-{
-    return Results.Ok(new
-    {
-        Message = $"Payment successful! Thank you for your payment of {amount}.",
-        Time = DateTime.UtcNow
-    });
-})
-.WithName("Payment")
-.WithOpenApi();
+app.MapUserEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

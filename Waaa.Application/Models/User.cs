@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Waaa.Infrastructure.Models
+namespace Waaa.Application.Models
 {
     public class User
     {

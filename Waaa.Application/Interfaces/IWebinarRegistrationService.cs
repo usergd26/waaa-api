@@ -1,5 +1,5 @@
 ﻿
-using Waaa.Infrastructure.Models;
+using Waaa.Application.Models;
 
 namespace Waaa.Application.Interfaces
 {

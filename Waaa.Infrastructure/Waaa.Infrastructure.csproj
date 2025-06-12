@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Waaa.Application\Waaa.Application.csproj" />
+    <ProjectReference Include="..\Waaa.Domain\Waaa.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

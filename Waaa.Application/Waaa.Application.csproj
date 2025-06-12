@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Waaa.Domain\Waaa.Domain.csproj" />
-    <ProjectReference Include="..\Waaa.Infrastructure\Waaa.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
