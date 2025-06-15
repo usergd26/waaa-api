@@ -85,6 +85,43 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure();
 var app = builder.Build();
 
+
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
+{
+    appBuilder.Use(async (context, next) =>
+    {
+        var headers = context.Request.Headers["Authorization"];
+        if (string.IsNullOrWhiteSpace(headers))
+        {
+            context.Response.Headers["WWW-Authenticate"] = "Basic";
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsync("Unauthorized");
+            return;
+        }
+
+        var encodedUsernamePassword = headers.ToString().Replace("Basic ", "");
+        var decodedUsernamePassword = System.Text.Encoding.UTF8.GetString(
+            Convert.FromBase64String(encodedUsernamePassword));
+
+        var parts = decodedUsernamePassword.Split(':', 2);
+        var username = parts[0];
+        var password = parts[1];
+
+        var validUsername = "admin";
+        var validPassword = "password";
+
+        if (username != validUsername || password != validPassword)
+        {
+            context.Response.Headers["WWW-Authenticate"] = "Basic";
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsync("Unauthorized");
+            return;
+        }
+
+        await next.Invoke();
+    });
+});
+
 using (var scope = app.Services.CreateScope())
 {
     try

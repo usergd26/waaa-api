@@ -10,7 +10,7 @@ namespace Waaa.Application.Services
         {
             var userId = userRepository.GetUserByEmailOrPhoneAsync(user.Email, user.Phone).Result?.Id ?? 0;
 
-            if (userId != 0) 
+            if (userId != 0)
             {
                 var existingRegistrations = await webinarRegistrationRepository.GetRegistrationsByUserIdAsync(userId);
 
@@ -30,14 +30,18 @@ namespace Waaa.Application.Services
                 });
             }
 
-
-           var regId =  await webinarRegistrationRepository.AddRegistrationAsync(new Domain.Entities.WebinarRegistration
+            var regId = await webinarRegistrationRepository.AddRegistrationAsync(new Domain.Entities.WebinarRegistration
             {
                 UserId = userId,
                 WebinarId = 1,
                 PaymentStatus = false,
             });
             return regId;
+        }
+
+        public async Task<bool> AddPaymentAsync(int id)
+        {
+            return await webinarRegistrationRepository.AddPaymentAsync(id);
         }
     }
 }

@@ -5,7 +5,7 @@ using Waaa.Domain.Interfaces;
 namespace Waaa.Domain.Repositories
 {
     public class WebinarRegistrationRepository(AppDbContext dbContext ) : IWebinarRegistrationRepository
-    {
+    {  
         async Task<int> IWebinarRegistrationRepository.AddRegistrationAsync(WebinarRegistration registration)
         {
             await dbContext.WebinarRegistrations.AddAsync(registration);
@@ -21,6 +21,14 @@ namespace Waaa.Domain.Repositories
         async Task<WebinarRegistration> IWebinarRegistrationRepository.GetRegistrationsByUserIdAsync(int userId)
         {
             return await dbContext.WebinarRegistrations.FirstOrDefaultAsync(x => x.UserId == userId);
+        }
+
+        public async Task<bool> AddPaymentAsync(int id)
+        {
+            var result = await dbContext.WebinarRegistrations.FirstOrDefaultAsync(x => x.Id == id);
+            if (result == null) return false;
+
+            return result.PaymentStatus = true;
         }
 
         Task<IEnumerable<WebinarRegistration>> IWebinarRegistrationRepository.GetRegistrationsByWebinarIdAsync(int webinarId)

@@ -9,5 +9,6 @@ namespace Waaa.Domain.Interfaces
         Task<WebinarRegistration> GetRegistrationsByUserIdAsync(int userId);
         Task<IEnumerable<WebinarRegistration>> GetRegistrationsByWebinarIdAsync(int webinarId);
         Task<bool> UpdateRegistrationAsync(WebinarRegistration registration);
+        Task<bool> AddPaymentAsync(int id);
     }
 }

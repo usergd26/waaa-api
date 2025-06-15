@@ -29,6 +29,13 @@ namespace Waaa.API.Endpoints
             })
             .WithTags("User")
             .WithOpenApi();
+            app.MapPost("/addpayment", async (int id, IWebinarRegistrationService webinarRegistrationService) =>
+            {
+                var result = await webinarRegistrationService.AddPaymentAsync(id);
+                return !result ? Results.BadRequest("Invalid User") : Results.Ok(result);
+            })
+            .WithTags("Payment")
+            .WithOpenApi();
         }
     }
 }
