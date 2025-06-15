@@ -28,7 +28,8 @@ namespace Waaa.Domain.Repositories
             var result = await dbContext.WebinarRegistrations.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null) return false;
 
-            return result.PaymentStatus = true;
+            result.PaymentStatus = true;
+            return await dbContext.SaveChangesAsync() > 0;
         }
 
         Task<IEnumerable<WebinarRegistration>> IWebinarRegistrationRepository.GetRegistrationsByWebinarIdAsync(int webinarId)
