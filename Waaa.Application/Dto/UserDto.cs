@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Waaa.Application.Models
+namespace Waaa.Application.Dto
 {
     public class UserDto
     {

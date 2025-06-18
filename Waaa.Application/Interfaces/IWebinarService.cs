@@ -1,5 +1,6 @@
 ﻿
-using Waaa.Application.Models;
+using Waaa.Application.Dto;
+using Waaa.Domain.Models;
 
 namespace Waaa.Application.Interfaces
 {
@@ -7,5 +8,6 @@ namespace Waaa.Application.Interfaces
     {
         Task<int> RegisterWebinarAsync(WebinarDto user);
         Task<bool> AddPaymentAsync(int id);
+        Task<IEnumerable<WebinarRegistrations>> GetWebinarRegistrationsAsync();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Waaa.Application.Models
+﻿namespace Waaa.Application.Dto
 {
     public class BluePrintDto : UserDto
     {

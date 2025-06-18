@@ -1,5 +1,6 @@
 ﻿using Waaa.Application.Interfaces;
-using Waaa.Application.Models;
+using Waaa.Application.Dto;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Waaa.API.Endpoints
 {
@@ -20,6 +21,14 @@ namespace Waaa.API.Endpoints
             {
                 var result = await webinarRegistrationService.AddPaymentAsync(id);
                 return !result ? Results.BadRequest("Invalid User") : Results.Ok(result);
+            })
+            .WithTags(tagGroup)
+            .WithOpenApi();
+
+            app.MapGet("/webinarregistrations", async (IWebinarService webinarRegistrationService) =>
+            {
+                var result = await webinarRegistrationService.GetWebinarRegistrationsAsync();
+                return Results.Ok(result);
             })
             .WithTags(tagGroup)
             .WithOpenApi();

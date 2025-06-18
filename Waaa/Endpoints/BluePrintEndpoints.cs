@@ -1,5 +1,5 @@
 ﻿using Waaa.Application.Interfaces;
-using Waaa.Application.Models;
+using Waaa.Application.Dto;
 
 namespace Waaa.API.Endpoints
 {

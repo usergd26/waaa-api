@@ -1,7 +1,6 @@
-﻿using Waaa.Application.Interfaces;
-using Waaa.Application.Models;
+﻿using Waaa.Application.Dto;
+using Waaa.Application.Interfaces;
 using Waaa.Domain.Interfaces;
-using Waaa.Domain.Repositories;
 
 namespace Waaa.Application.Services
 {

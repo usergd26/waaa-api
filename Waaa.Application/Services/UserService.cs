@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Waaa.Application.Interfaces;
 using Waaa.Domain.Interfaces;
-using Waaa.Application.Models;
+using Waaa.Application.Dto;
 
 namespace Waaa.Application.Services
 {
