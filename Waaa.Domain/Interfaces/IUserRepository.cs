@@ -5,7 +5,7 @@ namespace Waaa.Domain.Interfaces
     public interface IUserRepository
     {
         Task<int> AddUserAsync(AppUser user);
-        IEnumerable<AppUser> GetUsers();
+        Task<IEnumerable<AppUser>> GetUsersAsync();
         Task<AppUser> GetUserByEmailOrPhoneAsync(string email, string phone);
     }
 }

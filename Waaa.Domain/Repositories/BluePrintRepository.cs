@@ -15,7 +15,8 @@ namespace Waaa.Domain.Repositories
 
         public async Task<BluePrint> GetRegistrationsByUserIdAsync(int userId)
         {
-            return await dbContext.BluePrints.FirstOrDefaultAsync(x => x.UserId == userId);
+            return await dbContext.BluePrints.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
     }
 }

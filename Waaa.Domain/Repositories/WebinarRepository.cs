@@ -20,7 +20,8 @@ namespace Waaa.Domain.Repositories
 
         async Task<WebinarRegistration> IWebinarRepository.GetRegistrationsByUserIdAsync(int userId)
         {
-            return await dbContext.WebinarRegistrations.FirstOrDefaultAsync(x => x.UserId == userId);
+            return await dbContext.WebinarRegistrations.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<bool> AddPaymentAsync(int id)

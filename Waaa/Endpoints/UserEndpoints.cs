@@ -1,5 +1,4 @@
 ﻿using Waaa.Application.Interfaces;
-using Waaa.Application.Models;
 
 namespace Waaa.API.Endpoints
 {
@@ -7,9 +6,9 @@ namespace Waaa.API.Endpoints
     {
         public static void MapUserEndpoints(this IEndpointRouteBuilder app)
         {
-            app.MapGet("/users", (IUserService _userService) =>
+            app.MapGet("/users", async (IUserService userService) =>
             {
-                return Results.Ok(_userService.GetUsers());
+                return Results.Ok( await userService.GetUsersAsync());
             })
             .WithTags("User")
             .WithOpenApi();

@@ -5,20 +5,20 @@ using Waaa.Application.Models;
 
 namespace Waaa.Application.Services
 {
-    public class UserService(IUserRepository _userRepository, ILogger<UserService> _logger) : IUserService
+    public class UserService(IUserRepository userRepository, ILogger<UserService> logger) : IUserService
     {
         public async Task<int> AddUserAsync(UserDto user)
         {
-            var userId = await _userRepository.AddUserAsync(new Domain.Entities.AppUser { Name = user.Name, Email = user.Email, Phone = user.Phone });
+            var userId = await userRepository.AddUserAsync(new Domain.Entities.AppUser { Name = user.Name, Email = user.Email, Phone = user.Phone });
             if (userId > 0)
-                _logger.LogInformation("User added successfully: {UserId}", userId);
+                logger.LogInformation("User added successfully: {UserId}", userId);
 
             return userId;
         }
 
-        public IEnumerable<UserDto> GetUsers()
+        public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
-            var users = _userRepository.GetUsers();
+            var users = await userRepository.GetUsersAsync();
             return users.Select(u => new UserDto { Id = u.Id, Name = u.Name, Email = u.Email, Phone = u.Phone });
         }
     }

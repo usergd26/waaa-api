@@ -13,10 +13,13 @@ namespace Waaa.Domain.Repositories
             return user.Id;
         }
 
-        public IEnumerable<AppUser> GetUsers()
+        public async Task<IEnumerable<AppUser>> GetUsersAsync()
         {
-            return dbContext.AppUsers;
+            return await dbContext.AppUsers
+                .AsNoTracking()
+                .ToListAsync();
         }
+
         public async Task<AppUser> GetUserByEmailOrPhoneAsync(string email, string phone)
         {
             return await dbContext.AppUsers.FirstOrDefaultAsync(u => u.Email == email || u.Phone == phone);
