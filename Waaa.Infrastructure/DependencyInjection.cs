@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Waaa.Application.Interfaces;
 using Waaa.Application.Services;
 using Waaa.Domain.Interfaces;
@@ -14,6 +15,7 @@ namespace Waaa.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IWebinarRegistrationService, WebinarRegistrationService>();
             services.AddScoped<IWebinarRegistrationRepository, WebinarRegistrationRepository>();
+            services.AddTransient<IEmailSender<IdentityUser>, AuthEmailService>();
             return services;
         }
     }

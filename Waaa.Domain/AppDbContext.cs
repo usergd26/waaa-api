@@ -1,17 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Waaa.Domain.Entities;
 
 namespace Waaa.Domain
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<User> Users { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<AppUser> Users { get; set; }
         public DbSet<WebinarRegistration> WebinarRegistrations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity =>
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AppUser>(entity =>
             {
                 entity.HasKey(u => u.Id);
 
@@ -43,7 +48,7 @@ namespace Waaa.Domain
                       .IsRequired();
                 entity.Property(wr => wr.RegistrationDate)
                       .IsRequired();
-                entity.HasOne(wr => wr.User)
+                entity.HasOne(wr => wr.AppUser)
                       .WithMany()
                       .HasForeignKey(wr => wr.UserId)
                       .OnDelete(DeleteBehavior.Restrict);

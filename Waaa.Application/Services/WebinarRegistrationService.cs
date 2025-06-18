@@ -22,7 +22,7 @@ namespace Waaa.Application.Services
 
             if (userId == 0)
             {
-                userId = await userRepository.AddUserAsync(new Domain.Entities.User
+                userId = await userRepository.AddUserAsync(new Domain.Entities.AppUser
                 {
                     Name = user.Name,
                     Email = user.Email,

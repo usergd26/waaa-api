@@ -6,21 +6,20 @@ namespace Waaa.Domain.Repositories
 {
     public class UserRepository(AppDbContext dbContext) : IUserRepository
     {
-        public async Task<int> AddUserAsync(User user)
+        public async Task<int> AddUserAsync(AppUser user)
         {
-            await dbContext.Users.AddAsync(user);
-            await dbContext.SaveChangesAsync();
+            await dbContext.AppUsers.AddAsync(user);
+            var res = await dbContext.SaveChangesAsync();
             return user.Id;
         }
 
-        public async Task<User> GetUserByEmailOrPhoneAsync(string email, string phone)
+        public IEnumerable<AppUser> GetUsers()
+        {
+            return dbContext.AppUsers;
+        }
+        public async Task<AppUser> GetUserByEmailOrPhoneAsync(string email, string phone)
         {
             return await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email || u.Phone == phone);
-        }
-
-        public IEnumerable<User> GetUsers()
-        {
-            return dbContext.Users;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Waaa.Application.Services
     {
         public async Task<int> AddUserAsync(User user)
         {
-            var userId = await _userRepository.AddUserAsync(new Domain.Entities.User { Name = user.Name, Email = user.Email, Phone = user.Phone });
+            var userId = await _userRepository.AddUserAsync(new Domain.Entities.AppUser { Name = user.Name, Email = user.Email, Phone = user.Phone });
             if (userId > 0)
                 _logger.LogInformation("User added successfully: {UserId}", userId);
 
