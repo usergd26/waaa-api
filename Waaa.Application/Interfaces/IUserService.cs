@@ -4,7 +4,7 @@ namespace Waaa.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<int> AddUserAsync(User user);
-        IEnumerable<User> GetUsers();
+        Task<int> AddUserAsync(UserDto user);
+        IEnumerable<UserDto> GetUsers();
     }
 }

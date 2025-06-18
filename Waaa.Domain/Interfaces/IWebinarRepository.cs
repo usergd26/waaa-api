@@ -2,7 +2,7 @@
 
 namespace Waaa.Domain.Interfaces
 {
-    public interface IWebinarRegistrationRepository
+    public interface IWebinarRepository
     {
         Task<int> AddRegistrationAsync(WebinarRegistration registration);
         Task<WebinarRegistration?> GetRegistrationByIdAsync(int id);

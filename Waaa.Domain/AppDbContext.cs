@@ -9,8 +9,8 @@ namespace Waaa.Domain
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<AppUser> AppUsers { get; set; }
-        public DbSet<AppUser> Users { get; set; }
         public DbSet<WebinarRegistration> WebinarRegistrations { get; set; }
+        public DbSet<BluePrint> BluePrints { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +45,21 @@ namespace Waaa.Domain
                 entity.Property(wr => wr.UserId)
                       .IsRequired();
                 entity.Property(wr => wr.WebinarId)
+                      .IsRequired();
+                entity.Property(wr => wr.RegistrationDate)
+                      .IsRequired();
+                entity.HasOne(wr => wr.AppUser)
+                      .WithMany()
+                      .HasForeignKey(wr => wr.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<BluePrint>(entity =>
+            {
+                entity.HasKey(wr => wr.Id);
+                entity.Property(wr => wr.Id)
+                      .ValueGeneratedOnAdd();
+                entity.Property(wr => wr.UserId)
                       .IsRequired();
                 entity.Property(wr => wr.RegistrationDate)
                       .IsRequired();

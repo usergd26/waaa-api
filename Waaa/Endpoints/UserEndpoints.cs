@@ -13,29 +13,6 @@ namespace Waaa.API.Endpoints
             })
             .WithTags("User")
             .WithOpenApi();
-
-            app.MapPost("/getblueprint", async (User user, IUserService _userService) =>
-            {
-
-                return Results.Ok(await _userService.AddUserAsync(user));
-            })
-            .WithTags("User")
-            .WithOpenApi();
-
-            app.MapPost("/registerwebinar", async (User user, IWebinarRegistrationService webinarRegistrationService) =>
-            {
-                var result = await webinarRegistrationService.RegisterWebinarAsync(user);
-                return result == 0 ? Results.Conflict("The user is already registered.") : Results.Ok(result);
-            })
-            .WithTags("User")
-            .WithOpenApi();
-            app.MapPost("/addpayment", async (int id, IWebinarRegistrationService webinarRegistrationService) =>
-            {
-                var result = await webinarRegistrationService.AddPaymentAsync(id);
-                return !result ? Results.BadRequest("Invalid User") : Results.Ok(result);
-            })
-            .WithTags("Payment")
-            .WithOpenApi();
         }
     }
 }

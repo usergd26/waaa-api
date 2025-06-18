@@ -11,11 +11,16 @@ namespace Waaa.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
+            //Services
+            services.AddScoped<IWebinarService, WebinarService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IWebinarRegistrationService, WebinarRegistrationService>();
-            services.AddScoped<IWebinarRegistrationRepository, WebinarRegistrationRepository>();
+            services.AddScoped<IBluePrintService, BluePrintService>();
             services.AddTransient<IEmailSender<IdentityUser>, AuthEmailService>();
+
+            //Repositories
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IWebinarRepository, WebinarRepository>();
+            services.AddScoped<IBluePrintRepository, BluePrintRepository>();
             return services;
         }
     }

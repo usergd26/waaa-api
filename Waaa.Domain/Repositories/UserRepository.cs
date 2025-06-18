@@ -19,7 +19,7 @@ namespace Waaa.Domain.Repositories
         }
         public async Task<AppUser> GetUserByEmailOrPhoneAsync(string email, string phone)
         {
-            return await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email || u.Phone == phone);
+            return await dbContext.AppUsers.FirstOrDefaultAsync(u => u.Email == email || u.Phone == phone);
         }
     }
 }

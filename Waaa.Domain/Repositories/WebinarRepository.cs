@@ -4,21 +4,21 @@ using Waaa.Domain.Interfaces;
 
 namespace Waaa.Domain.Repositories
 {
-    public class WebinarRegistrationRepository(AppDbContext dbContext ) : IWebinarRegistrationRepository
+    public class WebinarRepository(AppDbContext dbContext ) : IWebinarRepository
     {  
-        async Task<int> IWebinarRegistrationRepository.AddRegistrationAsync(WebinarRegistration registration)
+        async Task<int> IWebinarRepository.AddRegistrationAsync(WebinarRegistration registration)
         {
             await dbContext.WebinarRegistrations.AddAsync(registration);
             await dbContext.SaveChangesAsync();
             return registration.Id;
         }
 
-        Task<WebinarRegistration?> IWebinarRegistrationRepository.GetRegistrationByIdAsync(int id)
+        Task<WebinarRegistration?> IWebinarRepository.GetRegistrationByIdAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        async Task<WebinarRegistration> IWebinarRegistrationRepository.GetRegistrationsByUserIdAsync(int userId)
+        async Task<WebinarRegistration> IWebinarRepository.GetRegistrationsByUserIdAsync(int userId)
         {
             return await dbContext.WebinarRegistrations.FirstOrDefaultAsync(x => x.UserId == userId);
         }
@@ -32,12 +32,12 @@ namespace Waaa.Domain.Repositories
             return await dbContext.SaveChangesAsync() > 0;
         }
 
-        Task<IEnumerable<WebinarRegistration>> IWebinarRegistrationRepository.GetRegistrationsByWebinarIdAsync(int webinarId)
+        Task<IEnumerable<WebinarRegistration>> IWebinarRepository.GetRegistrationsByWebinarIdAsync(int webinarId)
         {
             throw new NotImplementedException();
         }
 
-        Task<bool> IWebinarRegistrationRepository.UpdateRegistrationAsync(WebinarRegistration registration)
+        Task<bool> IWebinarRepository.UpdateRegistrationAsync(WebinarRegistration registration)
         {
             throw new NotImplementedException();
         }

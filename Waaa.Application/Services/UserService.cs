@@ -7,7 +7,7 @@ namespace Waaa.Application.Services
 {
     public class UserService(IUserRepository _userRepository, ILogger<UserService> _logger) : IUserService
     {
-        public async Task<int> AddUserAsync(User user)
+        public async Task<int> AddUserAsync(UserDto user)
         {
             var userId = await _userRepository.AddUserAsync(new Domain.Entities.AppUser { Name = user.Name, Email = user.Email, Phone = user.Phone });
             if (userId > 0)
@@ -16,10 +16,10 @@ namespace Waaa.Application.Services
             return userId;
         }
 
-        public IEnumerable<User> GetUsers()
+        public IEnumerable<UserDto> GetUsers()
         {
             var users = _userRepository.GetUsers();
-            return users.Select(u => new User { Id = u.Id, Name = u.Name, Email = u.Email, Phone = u.Phone });
+            return users.Select(u => new UserDto { Id = u.Id, Name = u.Name, Email = u.Email, Phone = u.Phone });
         }
     }
 }

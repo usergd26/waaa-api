@@ -4,11 +4,11 @@ using Waaa.Application.Models;
 
 namespace Waaa.Application.Services
 {
-    public class WebinarRegistrationService(IUserRepository userRepository, IWebinarRegistrationRepository webinarRegistrationRepository) : IWebinarRegistrationService
+    public class WebinarService(IUserRepository userRepository, IWebinarRepository webinarRegistrationRepository) : IWebinarService
     {
-        public async Task<int> RegisterWebinarAsync(User user)
+        public async Task<int> RegisterWebinarAsync(WebinarDto webinarDto)
         {
-            var userId = userRepository.GetUserByEmailOrPhoneAsync(user.Email, user.Phone).Result?.Id ?? 0;
+            var userId = userRepository.GetUserByEmailOrPhoneAsync(webinarDto.Email, webinarDto.Phone).Result?.Id ?? 0;
 
             if (userId != 0)
             {
@@ -20,20 +20,20 @@ namespace Waaa.Application.Services
                 }
             }
 
-            if (userId == 0)
+            else
             {
                 userId = await userRepository.AddUserAsync(new Domain.Entities.AppUser
                 {
-                    Name = user.Name,
-                    Email = user.Email,
-                    Phone = user.Phone
+                    Name = webinarDto.Name,
+                    Email = webinarDto.Email,
+                    Phone = webinarDto.Phone
                 });
             }
 
             var regId = await webinarRegistrationRepository.AddRegistrationAsync(new Domain.Entities.WebinarRegistration
             {
                 UserId = userId,
-                WebinarId = 1,
+                WebinarId = webinarDto.WebinarId,
                 PaymentStatus = false,
             });
             return regId;

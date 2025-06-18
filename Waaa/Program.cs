@@ -146,6 +146,8 @@ using (var scope = app.Services.CreateScope())
 
 
 app.MapUserEndpoints();
+app.MapWebinarEndpoints();
+app.MapBluePrintEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -2,7 +2,7 @@
 
 namespace Waaa.Application.Models
 {
-    public class User
+    public class UserDto
     {
         [JsonIgnore]
         public int Id { get; set; }
