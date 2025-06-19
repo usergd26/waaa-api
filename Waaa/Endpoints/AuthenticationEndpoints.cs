@@ -105,7 +105,7 @@ namespace Waaa.API.Endpoints
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddHours(1)
                 });
 

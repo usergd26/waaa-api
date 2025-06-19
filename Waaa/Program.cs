@@ -93,11 +93,12 @@ builder.Services.AddCors(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;           // ✅ Needed for cross-origin
-    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // ✅ Only for HTTP dev; use 'Always' in production
+    options.Cookie.SameSite = SameSiteMode.None;         
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
 });
+
 
 
 var jwtConfig = builder.Configuration.GetSection("Jwt");
@@ -110,6 +111,20 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Check for token in cookie
+            var token = context.HttpContext.Request.Cookies["token"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
+
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -122,6 +137,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
