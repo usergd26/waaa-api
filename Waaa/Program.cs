@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 using Waaa.API.Endpoints;
 using Waaa.Domain;
 using Waaa.Infrastructure;
@@ -36,28 +37,29 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication();  // Usually optional but recommended
-builder.Services.AddAuthorization();
-
+builder.Services.AddAuthentication(); 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("admin"));
+});
 builder.Services.AddEndpointsApiExplorer();
 
 // Enable Swagger middleware
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-
-    // Add BasicAuth definition
-    c.AddSecurityDefinition("basic", new OpenApiSecurityScheme
+    // ✅ Add security definition
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Type = SecuritySchemeType.Http,
-        Scheme = "basic",
-        In = ParameterLocation.Header,
         Name = "Authorization",
-        Description = "Enter your username and password for Basic Auth"
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Enter your JWT token"
     });
 
-    // Add BasicAuth requirement
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -65,7 +67,7 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "basic"
+                    Id = "Bearer"
                 }
             },
             Array.Empty<string>()
@@ -77,58 +79,55 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:5173", "https://waaa-app-coral.vercel.app")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials(); ;
     });
 });
 
 // Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.None;           // ✅ Needed for cross-origin
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // ✅ Only for HTTP dev; use 'Always' in production
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.SlidingExpiration = true;
+});
+
+
+var jwtConfig = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtConfig["Key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtConfig["Issuer"],
+        ValidAudience = jwtConfig["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure();
 var app = builder.Build();
-
-
-app.UseWhen(context => context.Request.Path.StartsWithSegments("/swagger"), appBuilder =>
-{
-    appBuilder.Use(async (context, next) =>
-    {
-        var headers = context.Request.Headers["Authorization"];
-        if (string.IsNullOrWhiteSpace(headers))
-        {
-            context.Response.Headers["WWW-Authenticate"] = "Basic";
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("Unauthorized");
-            return;
-        }
-
-        var encodedUsernamePassword = headers.ToString().Replace("Basic ", "");
-        var decodedUsernamePassword = System.Text.Encoding.UTF8.GetString(
-            Convert.FromBase64String(encodedUsernamePassword));
-
-        var parts = decodedUsernamePassword.Split(':', 2);
-        var username = parts[0];
-        var password = parts[1];
-
-        var validUsername = "admin";
-        var validPassword = "password";
-
-        if (username != validUsername || password != validPassword)
-        {
-            context.Response.Headers["WWW-Authenticate"] = "Basic";
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("Unauthorized");
-            return;
-        }
-
-        await next.Invoke();
-    });
-});
 
 using (var scope = app.Services.CreateScope())
 {
@@ -148,6 +147,7 @@ using (var scope = app.Services.CreateScope())
 app.MapUserEndpoints();
 app.MapWebinarEndpoints();
 app.MapBluePrintEndpoints();
+app.MapAuthenticationEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -155,9 +155,10 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 });
 
-app.MapIdentityApi<IdentityUser>().WithTags("Authentication");
-
 app.UseCors("AllowAll");
+
+//app.MapIdentityApi<IdentityUser>().WithTags("Authentication");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

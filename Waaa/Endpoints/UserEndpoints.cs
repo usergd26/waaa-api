@@ -11,7 +11,8 @@ namespace Waaa.API.Endpoints
                 return Results.Ok( await userService.GetUsersAsync());
             })
             .WithTags("User")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("AdminOnly");
         }
     }
 }
