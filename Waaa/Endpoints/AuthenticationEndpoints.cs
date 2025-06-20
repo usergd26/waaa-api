@@ -10,7 +10,7 @@ namespace Waaa.API.Endpoints
     public static class AuthenticationEndpoints
     {
         private const string endpointGroup = "Authentication";
-        public static void MapAuthenticationEndpoints(this IEndpointRouteBuilder app)
+        public static void MapAuthenticationEndpoints(this IEndpointRouteBuilder app, IWebHostEnvironment environment)
         {
 
             app.MapGet("/users/{userId}/roles", async (string userId, UserManager<IdentityUser> userManager) =>
@@ -38,6 +38,23 @@ namespace Waaa.API.Endpoints
                 return result.Succeeded ? Results.Ok($"User added to role '{roleName}'") :
                                           Results.BadRequest(result.Errors);
             }).WithTags(endpointGroup);
+
+            app.MapPost("/users/{userId}/remove-role", async (string userId,string roleName,UserManager<IdentityUser> userManager,RoleManager<IdentityRole> roleManager) =>
+            {
+                var user = await userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Results.NotFound("User not found.");
+
+                if (!await roleManager.RoleExistsAsync(roleName))
+                    return Results.BadRequest("Role does not exist.");
+
+                var result = await userManager.RemoveFromRoleAsync(user, roleName);
+
+                return result.Succeeded
+                    ? Results.Ok($"Role '{roleName}' removed from user.")
+                    : Results.BadRequest(result.Errors);
+            }).WithTags(endpointGroup);
+
 
             app.MapPost("/newrole", async (string roleName, RoleManager<IdentityRole> roleManager) =>
             {
@@ -104,9 +121,11 @@ namespace Waaa.API.Endpoints
                 response.Cookies.Append("token", tokenString, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddHours(1)
+                    Secure = environment.IsProduction(), // Only secure in production
+                    SameSite = environment.IsProduction() ? SameSiteMode.None : SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddHours(1),
+                    Domain = environment.IsProduction() ? ".yourdomain.com" : null,
+                    Path = "/"
                 });
 
                 return Results.Ok(new { success = true });
