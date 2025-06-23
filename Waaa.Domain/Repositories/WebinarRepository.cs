@@ -56,6 +56,8 @@ namespace Waaa.Domain.Repositories
                       {
                           RegistrationId = reg.Id,
                           Name = user.Name,
+                          Email = user.Email,
+                          Phone = user.Phone,
                           WebinarId = web.Id,
                           WebinarName = web.Name,
                           PaymentStatus = reg.PaymentStatus

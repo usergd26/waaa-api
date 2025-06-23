@@ -17,7 +17,7 @@ namespace Waaa.API.Endpoints
             .WithTags(tagGroup)
             .WithOpenApi();
 
-            app.MapPost("/addpayment", async (int id, IWebinarService webinarRegistrationService) =>
+            app.MapPatch("/addpayment", async (int id, IWebinarService webinarRegistrationService) =>
             {
                 var result = await webinarRegistrationService.AddPaymentAsync(id);
                 return !result ? Results.BadRequest("Invalid User") : Results.Ok(result);
