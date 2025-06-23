@@ -91,14 +91,14 @@ builder.Services.AddCors(options =>
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    options.Cookie.HttpOnly = true;
-//    options.Cookie.SameSite = SameSiteMode.None;         
-//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
-//    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-//    options.SlidingExpiration = true;
-//});
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.None;         
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.SlidingExpiration = true;
+});
 
 
 
@@ -144,9 +144,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenApi();
 
 builder.Services.AddInfrastructure();
-
-var environment = builder.Environment;
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -167,7 +164,7 @@ using (var scope = app.Services.CreateScope())
 app.MapUserEndpoints();
 app.MapWebinarEndpoints();
 app.MapBluePrintEndpoints();
-app.MapAuthenticationEndpoints(environment);
+app.MapAuthenticationEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
