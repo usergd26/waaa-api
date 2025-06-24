@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
+using System.Security.Claims;
 using System.Text;
 using Waaa.API.Endpoints;
 using Waaa.Domain;
@@ -36,14 +37,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddApiEndpoints(); // Add this line for Identity endpoints
 
-builder.Services.AddAuthentication(); 
-builder.Services.AddAuthorization(options =>
+// Configure Identity Bearer token to include roles
+builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("admin"));
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 });
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Enable Swagger middleware
@@ -76,31 +87,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173", "https://waaa-app-coral.vercel.app")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials(); ;
-    });
-});
-
-// Add services to the container.
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;         
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
-    options.ExpireTimeSpan = TimeSpan.FromDays(7);
-    options.SlidingExpiration = true;
-});
-
-
 
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtConfig["Key"]);
@@ -110,35 +96,44 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    options.Events = new JwtBearerEvents
+    .AddJwtBearer("Bearer", options =>
     {
-        OnMessageReceived = context =>
-        {
-            // Check for token in cookie
-            var token = context.HttpContext.Request.Cookies["token"];
-            if (!string.IsNullOrEmpty(token))
-            {
-                context.Token = token;
-            }
-            return Task.CompletedTask;
-        }
-    };
+        options.SaveToken = true;
 
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtConfig["Issuer"],
-        ValidAudience = jwtConfig["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
-    };
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = false,
+            ValidIssuer = jwtConfig["Issuer"],
+            ValidAudience = jwtConfig["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("admin"));
 });
 
+
+builder.Services.AddCors(options =>
+{
+    // Update your CORS policy to include your frontend origin
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "https://waaa-app-coral.vercel.app",
+            "https://localhost:44388" // Add this
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials(); // Add this if using cookies
+    });
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -161,10 +156,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-app.MapUserEndpoints();
-app.MapWebinarEndpoints();
-app.MapBluePrintEndpoints();
-app.MapAuthenticationEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -172,16 +163,13 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
 });
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 
-app.UseCors("AllowAll");
+
+app.MapUserEndpoints();
+app.MapWebinarEndpoints();
+app.MapBluePrintEndpoints();
+app.MapAuthenticationEndpoints();
 
 //app.MapIdentityApi<IdentityUser>().WithTags("Authentication");
 
@@ -193,7 +181,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
