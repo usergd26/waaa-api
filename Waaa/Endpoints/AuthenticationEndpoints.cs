@@ -101,15 +101,7 @@ namespace Waaa.API.Endpoints
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                response.Cookies.Append("token", tokenString, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddHours(1)
-                });
-
-                return Results.Ok(new { success = true });
+                return Results.Ok(tokenString);
             }).WithTags(endpointGroup);
 
             app.MapPost("/logout", (HttpResponse response) =>
