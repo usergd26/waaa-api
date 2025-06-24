@@ -22,7 +22,8 @@ namespace Waaa.API.Endpoints
                 var roles = await userManager.GetRolesAsync(user);
                 return Results.Ok(roles);
             })
-            .WithTags(endpointGroup);
+            .WithTags(endpointGroup)
+            .RequireAuthorization();
 
             app.MapPost("/users/{userId}/assign-role", async (string userId, string roleName, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager) =>
             {
@@ -37,7 +38,26 @@ namespace Waaa.API.Endpoints
 
                 return result.Succeeded ? Results.Ok($"User added to role '{roleName}'") :
                                           Results.BadRequest(result.Errors);
-            }).WithTags(endpointGroup);
+            }).WithTags(endpointGroup)
+              .RequireAuthorization("AdminOnly");
+
+            app.MapPost("/users/{userId}/remove-role", async (string userId,string roleName,UserManager<IdentityUser> userManager,RoleManager<IdentityRole> roleManager) =>
+            {
+                var user = await userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return Results.NotFound("User not found.");
+
+                if (!await roleManager.RoleExistsAsync(roleName))
+                    return Results.BadRequest("Role does not exist.");
+
+                var result = await userManager.RemoveFromRoleAsync(user, roleName);
+
+                return result.Succeeded
+                    ? Results.Ok($"Role '{roleName}' removed from user.")
+                    : Results.BadRequest(result.Errors);
+            }).WithTags(endpointGroup)
+            .RequireAuthorization();
+
 
             app.MapPost("/newrole", async (string roleName, RoleManager<IdentityRole> roleManager) =>
             {
@@ -48,13 +68,14 @@ namespace Waaa.API.Endpoints
 
                 return result.Succeeded ? Results.Ok($"Role '{roleName}' created.") :
                                           Results.BadRequest(result.Errors);
-            }).WithTags(endpointGroup);
+            }).WithTags(endpointGroup)
+            .RequireAuthorization("AdminOnly");
 
             app.MapGet("/my-userid", (HttpContext context) =>
             {
                 var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 return Results.Ok(new { UserId = userId });
-            }).RequireAuthorization()
+            }).RequireAuthorization("AdminOnly")
             .WithTags(endpointGroup);
 
             app.MapGet("/auth-users", (UserManager<IdentityUser> userManager) =>
@@ -67,7 +88,7 @@ namespace Waaa.API.Endpoints
                 });
 
                 return Results.Ok(users);
-            }).RequireAuthorization()
+            }).RequireAuthorization("AdminOnly")
             .WithTags(endpointGroup);
 
             app.MapGet("/users/by-email/{email}", async (string email,UserManager<IdentityUser> userManager) =>
@@ -77,7 +98,7 @@ namespace Waaa.API.Endpoints
                     ? Results.Ok(user)
                     : Results.NotFound("User not found.");
             })
-                .RequireAuthorization()
+                .RequireAuthorization("AdminOnly")
                 .WithTags(endpointGroup);
 
             app.MapPost("/login", async (UserManager<IdentityUser> userManager, IConfiguration config, LoginRequest login, HttpResponse response) =>
