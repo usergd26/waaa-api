@@ -127,7 +127,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
             "http://localhost:5173",
             "https://waaa-app-coral.vercel.app",
-            "https://localhost:44388" // Add this
+            "https://localhost:44388",
+            "https://waaa.in"
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
