@@ -128,7 +128,7 @@ builder.Services.AddCors(options =>
             "http://localhost:5173",
             "https://waaa-app-coral.vercel.app",
             "https://localhost:44388",
-            "https://waaa.in"
+            "https://www.waaa.in"
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
